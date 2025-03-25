@@ -1,12 +1,12 @@
 from params import *
 import numpy as np
-from components import Batteries, Motors
+from components import Batteries, Motors, Ballast, Structure
 from components import neo2ft, gen1_6ft
+import materials
 
 class Ball:
-    def __init__(self, radius, ballast):
+    def __init__(self, radius, ballast_thk):
         self.radius = radius
-        self.ballast = ballast
 
         self.batteries = Batteries(self.radius)
         self.motors = self.select_motors()
@@ -14,6 +14,16 @@ class Ball:
 
         self.volumePendulum = self.pendulum_volume()
         self.lengthPendulum = self.pendulum_length()
+
+        if self.radius < designThreshold:
+            structureMaterial = materials.nylon
+            overhang = 4/12.0
+        else:
+            structureMaterial = materials.al6061
+            overhang = 0
+        self.pendulum = Structure(structureMaterial, self.hubRad, overhang, self.radius)
+
+        self.ballast = Ballast(self.hubRad, ballast_thk, materials.copper)
 
         self.massPendulum = self.pendulum_mass()
         self.massShell = self.mass_shell()
@@ -36,7 +46,7 @@ class Ball:
         return np.arcsin(self.motors.torque/(self.massPendulum*self.radiusGravity))*180/np.pi
 
     def select_motors(self):
-        if self.radius < 1.5:
+        if self.radius < designThreshold:
             return neo2ft
         else:
             return gen1_6ft
@@ -53,7 +63,7 @@ class Ball:
     def radius_gravity(self):
         cgStructure =  self.volumePendulum*structureDensity * (self.lengthPendulum*0.5) #half way along pendulum length
         cgBallast   =  self.ballast*self.lengthPendulum
-        if self.radius > 1.5:
+        if self.radius > designThreshold:
             cgBatteries = self.batteries.mass * (self.lengthPendulum - self.batteries.height) #midway between batteries
             cgActuators = self.motors.mass * (self.lengthPendulum - self.batteries.height*2 - self.motors.radius) #above batteries
             cgPenalty = 0
@@ -72,7 +82,7 @@ class Ball:
         return massBedliner + massShaft + 20
 
     def thickness_shell(self):
-        if self.radius > 1.5:
+        if self.radius > designThreshold:
             return 1/(4.0*12)
         else:
             return 1/(8.0*12)
@@ -81,14 +91,14 @@ class Ball:
         return 0.9*self.radius
     
     def pendulum_volume(self):
-        if self.radius > 1.5:
-            hub_rad = 22*0.0833
+        if self.radius > designThreshold:
+            self.hubRad = 22*0.0833
         else: 
-            hub_rad = 19*0.0833
-        return hub_rad**2 * np.pi * self.pendulum_length()
+            self.hubRad = 19*0.0833
+        return self.hubRad**2 * np.pi * self.pendulum_length()
 
     def pendulum_mass(self):
-        return self.motors.mass + self.batteries.mass + self.volumePendulum*structureDensity + self.ballast 
+        return self.motors.mass + self.batteries.mass + self.pendulum.mass + self.ballast.mass 
 
     def get_total_mass(self):
         return self.massShell+self.massPendulum

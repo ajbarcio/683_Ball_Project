@@ -1,4 +1,36 @@
 from params import *
+import numpy as np
+from materials import Material
+
+class Ballast:
+    def __init__(self, radius, thickness, material):
+        self.radius = radius
+        self.thickness = thickness
+        self.material = material
+        self.mass = self.get_mass()
+
+    def get_mass(self):
+        return self.radius**2 * np.pi * self.thickness
+
+class Structure:
+    def __init__(self, material: Material, hubcap, overhang, radius):
+        self.material = material
+        self.radius   = hubcap
+        self.overhang = overhang
+        self.length   = radius*0.9
+
+        self.envelopeVolume = self.get_volume(0)
+        self.mass = self.get_mass() 
+
+    def get_volume(self, reduction):
+        return (self.radius-reduction)**2*np.pi*(self.overhang+self.length-2*reduction)
+    
+    def get_mass(self):
+        # define structure mass as cylindrical shell of given material
+        # with "shelf" for battery, ballast, motors, electronics, pitch center
+        self.materialVolume = self.get_volume(0)-self.get_volume(self.material.thickness)
+        self.materialVolume+= (self.radius-self.material.thickness)**2 * np.pi * self.material.thickness * 5
+        return self.materialVolume*self.material.density
 
 class Batteries:
     def __init__(self, radius):
