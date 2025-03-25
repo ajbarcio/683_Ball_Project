@@ -1,13 +1,14 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy import optimize as opt
+from params import *
 
-motorTypes = {'example type': []}
-g = 32.1740
-volBattery = (2.5 * 7 * 7) * 0.000578704 # volume of battery (h x w x l in in3) to ft3 
-batteryMass = 15 # lbs
-structureDensity = 1.2 # lb/ft^3 ??
-shellDensity = 51 # lb/ft^3 ??
+# motorTypes = {'example type': []}
+# g = 32.1740
+# volBattery = (2.5 * 7 * 7) * 0.000578704 # volume of battery (h x w x l in in3) to ft3 
+# batteryMass = 15 # lbs
+# structureDensity = 1.2 # lb/ft^3 ??
+# shellDensity     = 51 # lb/ft^3 ??
 
 class Batteries:
     def __init__(self, radius):
@@ -62,9 +63,10 @@ class Motors:
                                     # volume: {self.volume:.2f}"
 
 class Ball:
-    def __init__(self, radius):
+    def __init__(self, radius, ballast):
         self.radius = radius
-        
+        self.ballast = ballast
+
         self.batteries = Batteries(self.radius)
         self.motors    = Motors(self.batteries.number)
 
@@ -78,7 +80,7 @@ class Ball:
 
         self.radiusGravity = self.radius_gravity()
         # self.radius
-        self.masses = {"Motors": self.motors.mass, 
+        self.outputMasses = {"Motors": self.motors.mass, 
                        "Batteries": self.batteries.mass,
                        "Pendulum Structure": self.volumePendulum*structureDensity,
                        "Pendulum Mass": self.massPendulum,
@@ -101,16 +103,17 @@ class Ball:
         return min(self.motors.torque, self.radiusGravity*self.massPendulum)
 
     def radius_gravity(self):
-        Cg_structure =  self.volumePendulum*structureDensity * (self.lengthPendulum*0.5) #half way along pendulum length
+        cgStructure =  self.volumePendulum*structureDensity * (self.lengthPendulum*0.5) #half way along pendulum length
+        cgBallast   =  self.ballast*self.lengthPendulum
         if self.radius > 1.5:
-            Cg_batteries = self.batteries.mass * (self.lengthPendulum - self.batteries.height) #midway between batteries
-            Cg_actuators = self.motors.mass * (self.lengthPendulum - self.batteries.height*2 - self.motors.radius) #above batteries
-            Cg_penalty = 0
+            cgBatteries = self.batteries.mass * (self.lengthPendulum - self.batteries.height) #midway between batteries
+            cgActuators = self.motors.mass * (self.lengthPendulum - self.batteries.height*2 - self.motors.radius) #above batteries
+            cgPenalty = 0
         else:
-            Cg_batteries = self.batteries.mass * (self.lengthPendulum - self.batteries.width/2) #midway between batteries
-            Cg_actuators = self.motors.mass * (self.lengthPendulum - self.batteries.width - self.motors.radius) #above batteries
-            Cg_penalty = 0.266
-        return (Cg_structure + Cg_batteries + Cg_actuators) / self.massPendulum - Cg_penalty
+            cgBatteries = self.batteries.mass * (self.lengthPendulum - self.batteries.width/2) #midway between batteries
+            cgActuators = self.motors.mass * (self.lengthPendulum - self.batteries.width - self.motors.radius) #above batteries
+            cgPenalty = 0.266
+        return (cgStructure + cgBatteries + cgActuators + cgBallast) / self.massPendulum - cgPenalty
 
     def mass_shell(self):
         massBedliner = 4.0/3.0*np.pi*(self.radius**3-(self.radius-self.thickness_shell())**3) * shellDensity # (8.75 * 0.133) #8.75 lb per gal, 0.133 ft3 per gal
@@ -137,7 +140,7 @@ class Ball:
         return hub_rad**2 * np.pi * self.pendulum_length()
 
     def pendulum_mass(self):
-        return self.motors.mass + self.batteries.mass + self.volumePendulum*structureDensity
+        return self.motors.mass + self.batteries.mass + self.volumePendulum*structureDensity + self.ballast 
 
     def get_total_mass(self):
         return self.massShell+self.massPendulum
@@ -152,17 +155,27 @@ def shellThickness(radiusShell):
         return 1/8.0
     
 def main():
-    # parse some arument for radius of ball
-    print(Ball(1).masses)
-    print(Ball(1).r_max())
-    R = np.linspace(1,3,1001)
-    slope = np.empty_like(R)
+
+    R = np.linspace(1,3,101)
+    # B = np.zeros_like(R)
+    B = np.linspace(0,55,len(R))
+    slope = np.zeros([len(R),len(R)])
     i = 0
     for radius in R:
-        testBall = Ball(radius)
-        slope[i] = testBall.max_slope()
+        j = 0
+        for ballast in B:
+            testBall = Ball(radius, ballast)
+            slope[j, i] = testBall.max_slope()
+            j+=1
         i+=1
-    plt.plot(R, slope)
+    Rg, Bg = np.meshgrid(R, B)
+    # plt.figure()
+    ax = plt.axes(projection='3d')
+    ax.plot_surface(Rg, Bg, slope)
+    
+    ax.set_xlabel("Ball Radius")
+    ax.set_ylabel("Ballast Mass")
+    ax.set_zlabel("Slope Angle")
     try:
         plt.show()
     except KeyboardInterrupt:
