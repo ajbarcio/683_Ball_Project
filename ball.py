@@ -1,6 +1,7 @@
 from params import *
 import numpy as np
 from components import Batteries, Motors
+from components import neo2ft, gen1_6ft
 
 class Ball:
     def __init__(self, radius, ballast):
