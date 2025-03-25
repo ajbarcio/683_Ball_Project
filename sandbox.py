@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 from scipy import optimize as opt
 from params import *
 
-from modules import Ball
+from ball import Ball
 
 # motorTypes = {'example type': []}
 # g = 32.1740
@@ -12,15 +12,6 @@ from modules import Ball
 # structureDensity = 1.2 # lb/ft^3 ??
 # shellDensity     = 51 # lb/ft^3 ??
 
-def shellMass(radiusShell):
-    return 4.0/3.0*np.pi*(radiusShell-(radiusShell-shellThickness(radiusShell)))
-
-def shellThickness(radiusShell):
-    if radiusShell > 1.5:
-        return 1/4.0
-    else:
-        return 1/8.0
-    
 def main():
 
     R = np.linspace(1,3,101)
@@ -47,16 +38,6 @@ def main():
         plt.show()
     except KeyboardInterrupt:
         return 0
-
-    # print(testBall.mass)
-    # print(testBall.masses)
-    # print("")
-    # print(testBall.radiusGravity)
-    # print(testBall.gamma_possible())
-    # print(testBall.torqueApplicable(), (testBall.radiusGravity*testBall.massPendulum))
-    # print("")
-    # print(testBall.max_slope())
-    # print(testBall.check_max_slope())
 
 if __name__ == "__main__":
     main()

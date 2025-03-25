@@ -1,57 +1,6 @@
 from params import *
 import numpy as np
-
-class Batteries:
-    def __init__(self, radius):
-        self.radius = radius
-        self.number = self.num_batteries()
-        self.mass = 15*self.number
-        self.volume = self.number*volBattery 
-
-        self.height = 2.5/12.0
-        self.width  = 7  /12.0
-        self.length = 7  /12.0
-
-    def num_batteries(self):
-        if self.radius > 1.5:
-            return 4
-        else:
-            return 2
-
-    def __str__(self):
-        f"mass: {self.mass:.2f}, number: {self.number}, volume: {self.volume:.2f}"
-
-class Motors:
-    def __init__(self, num_batteries):
-        self.num_batteries = num_batteries
-        self.torque = self.actuator_torques()
-        self.mass   = self.actuator_masses()
-        self.radius = self.actuator_radius()
-
-    def actuator_radius(self):
-        if self.num_batteries == 4:
-            return 4/12.0
-        elif self.num_batteries == 2:
-            return 1/12.0
-
-    def actuator_torques(self):
-        if self.num_batteries == 4:
-            self.reduction = 21
-            return 6.03 * 0.74 * 2 * self.reduction
-        elif self.num_batteries == 2:
-            self.reduction = 21.5
-            return 3.6 * 0.74 * 2 * self.reduction
-            
-    def actuator_masses(self):
-        if self.num_batteries == 4:
-            return 2 * 5 * 2.2 #actuator mass from kg to lb, 2 actuators on steer (drive is part of shell)
-        elif self.num_batteries == 2:
-            return 2 * 0.98 # just lbs from Neo Vortex Data sheet
-
-    def __str__(self):
-        return f"{self.name} motor, mass: {self.mass:.2f}, \
-                                    torque: {self.torque:.2f}"
-                                    # volume: {self.volume:.2f}"
+from components import Batteries, Motors
 
 class Ball:
     def __init__(self, radius, ballast):
@@ -59,7 +8,8 @@ class Ball:
         self.ballast = ballast
 
         self.batteries = Batteries(self.radius)
-        self.motors    = Motors(self.batteries.number)
+        self.motors = self.select_motors()
+        # self.motors    = Motors(self.batteries.number)
 
         self.volumePendulum = self.pendulum_volume()
         self.lengthPendulum = self.pendulum_length()
@@ -83,6 +33,12 @@ class Ball:
 
     def gamma_possible(self):
         return np.arcsin(self.motors.torque/(self.massPendulum*self.radiusGravity))*180/np.pi
+
+    def select_motors(self):
+        if self.radius < 1.5:
+            return neo2ft
+        else:
+            return gen1_6ft
 
     def r_max(self):
         return (self.radiusGravity*self.massPendulum)/self.mass

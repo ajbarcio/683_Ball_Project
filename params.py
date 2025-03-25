@@ -4,7 +4,3 @@ batteryMass = 15 # lbs
 structureDensity = 1.2 # lb/ft^3 ??
 shellDensity     = 51 # lb/ft^3 ??
 
-from modules import Motors, Ball, Batteries
-
-motorTypes = {'neo': []}
-
