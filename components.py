@@ -7,21 +7,21 @@ from materials import Material
 #         pass
 
 class Ballast:
-    def __init__(self, radius, thickness, material):
+    def __init__(self, radius, thickness, material: Material):
         self.radius = radius
         self.thickness = thickness
         self.material = material
         self.mass = self.get_mass()
 
     def get_mass(self):
-        return self.radius**2 * np.pi * self.thickness
+        return self.radius**2 * np.pi * self.thickness * self.material.density
 
 class Structure:
     def __init__(self, material: Material, hubcap, overhang, radius):
         self.material = material
         self.radius   = hubcap
         self.overhang = overhang
-        self.length   = radius*0.9
+        self.length   = radius*pendulumLengthFactor
 
         self.envelopeVolume = self.get_volume(0)
         self.mass = self.get_mass() 
@@ -38,7 +38,7 @@ class Structure:
         return self.materialVolume*self.material.density
 
     def get_cg(self):
-        return self.mass * (self.length-self.overhang)/2
+        return (self.length-self.overhang)/2
 
 
 class Batteries:

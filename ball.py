@@ -15,9 +15,9 @@ class Ball:
         self.volumePendulum = self.pendulum_volume()
         self.lengthPendulum = self.pendulum_length()
 
-        if self.radius < designThreshold:
+        if self.radius < radiusThreshold:
             structureMaterial = materials.nylon
-            overhang = 4/12.0
+            overhang = 6/12.0
         else:
             structureMaterial = materials.al6061
             overhang = 0
@@ -34,9 +34,10 @@ class Ball:
         # self.radius
         self.outputMasses = {"Motors": self.motors.mass, 
                        "Batteries": self.batteries.mass,
-                       "Pendulum Structure": self.volumePendulum*structureDensity,
+                       "Pendulum Structure": self.pendulum.mass,
+                       "Ballast": self.ballast.mass, 
                        "Pendulum Mass": self.massPendulum,
-                       "Shell": self.massShell, 
+                       "Shell": self.massShell,
                        "Total Ball Mass": self.mass}
         
     def check_max_slope(self):
@@ -46,7 +47,7 @@ class Ball:
         return np.arcsin(self.motors.torque/(self.massPendulum*self.radiusGravity))*180/np.pi
 
     def select_motors(self):
-        if self.radius < designThreshold:
+        if self.radius < radiusThreshold:
             return neo2ft
         else:
             return gen1_6ft
@@ -63,10 +64,12 @@ class Ball:
     def radius_gravity(self):
         # Define relevant locations:
         locationBallast     = self.lengthPendulum - self.ballast.thickness/2
-        locationBatteries   = locationBallast     - ((self.batteries.height) 
-                                                     if   self.radius > designThreshold 
-                                                     else (self.batteries.width/2))
-        locationSteerMotors = locationBatteries   - self.motors.radius
+        locationBatteries   = locationBallast - self.ballast.thickness/2 - ((self.batteries.height) 
+                                                                            if   self.radius > radiusThreshold 
+                                                                            else (self.batteries.width/2))
+        locationSteerMotors = locationBatteries -   ((self.batteries.height) 
+                                                     if   self.radius > radiusThreshold 
+                                                     else (self.batteries.width/2))  - self.motors.radius
         locationDriveMotors = self.radius/12/2 + self.motors.radius
         locations = [self.pendulum.cg, locationBallast, locationBatteries, locationSteerMotors, locationDriveMotors]
         masses    = [self.pendulum.mass, self.ballast.mass, self.batteries.mass, self.motors.mass, self.motors.mass]
@@ -82,10 +85,10 @@ class Ball:
         radiusShaft = self.radius/12 # R inches to feet
         thicknessShaft = 0.25/12
         massShaft = 169 * (2*self.radius* (radiusShaft**2 - (radiusShaft-thicknessShaft)**2) * np.pi)
-        return massBedliner + massShaft + 20
+        return massBedliner + massShaft + 20 # enveloping estimate for hubcaps
 
     def thickness_shell(self):
-        if self.radius > designThreshold:
+        if self.radius > radiusThreshold:
             return 1/(4.0*12)
         else:
             return 1/(8.0*12)
@@ -94,10 +97,10 @@ class Ball:
         return 0.9*self.radius
     
     def pendulum_volume(self):
-        if self.radius > designThreshold:
-            self.hubRad = 22*0.0833
+        if self.radius > radiusThreshold:
+            self.hubRad = 11*0.0833
         else: 
-            self.hubRad = 19*0.0833
+            self.hubRad = 8.5*0.0833
         return self.hubRad**2 * np.pi * self.pendulum_length()
 
     def pendulum_mass(self):

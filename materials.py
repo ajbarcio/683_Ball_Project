@@ -17,7 +17,7 @@ class Material:
 # Initialize materials here
 # Structure materials
 nylon    = Material("Nylon",     8.74,  .25/12)
-al6061   = Material("AL6061",  186.55,  .09/12)
+al6061   = Material("AL6061",  186.55,  .125/12)
 # Ballast Materials
 ss304    = Material("SS304",    490,     .0625/12)
 copper   = Material("Copper",   559,     .25/12)
