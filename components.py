@@ -2,6 +2,10 @@ from params import *
 import numpy as np
 from materials import Material
 
+# class Shell:
+#     def __init__(self):
+#         pass
+
 class Ballast:
     def __init__(self, radius, thickness, material):
         self.radius = radius
@@ -21,6 +25,7 @@ class Structure:
 
         self.envelopeVolume = self.get_volume(0)
         self.mass = self.get_mass() 
+        self.cg   = self.get_cg()
 
     def get_volume(self, reduction):
         return (self.radius-reduction)**2*np.pi*(self.overhang+self.length-2*reduction)
@@ -31,6 +36,10 @@ class Structure:
         self.materialVolume = self.get_volume(0)-self.get_volume(self.material.thickness)
         self.materialVolume+= (self.radius-self.material.thickness)**2 * np.pi * self.material.thickness * 5
         return self.materialVolume*self.material.density
+
+    def get_cg(self):
+        return self.mass * (self.length-self.overhang)/2
+
 
 class Batteries:
     def __init__(self, radius):

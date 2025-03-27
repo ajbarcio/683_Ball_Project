@@ -21,9 +21,9 @@ class Ball:
         else:
             structureMaterial = materials.al6061
             overhang = 0
+        
         self.pendulum = Structure(structureMaterial, self.hubRad, overhang, self.radius)
-
-        self.ballast = Ballast(self.hubRad, ballast_thk, materials.copper)
+        self.ballast = Ballast(self.hubRad, ballast_thk, materials.tungsten)
 
         self.massPendulum = self.pendulum_mass()
         self.massShell = self.mass_shell()
@@ -61,17 +61,20 @@ class Ball:
         return min(self.motors.torque, self.radiusGravity*self.massPendulum)
 
     def radius_gravity(self):
-        cgStructure =  self.volumePendulum*structureDensity * (self.lengthPendulum*0.5) #half way along pendulum length
-        cgBallast   =  self.ballast*self.lengthPendulum
-        if self.radius > designThreshold:
-            cgBatteries = self.batteries.mass * (self.lengthPendulum - self.batteries.height) #midway between batteries
-            cgActuators = self.motors.mass * (self.lengthPendulum - self.batteries.height*2 - self.motors.radius) #above batteries
-            cgPenalty = 0
-        else:
-            cgBatteries = self.batteries.mass * (self.lengthPendulum - self.batteries.width/2) #midway between batteries
-            cgActuators = self.motors.mass * (self.lengthPendulum - self.batteries.width - self.motors.radius) #above batteries
-            cgPenalty = 0.266
-        return (cgStructure + cgBatteries + cgActuators + cgBallast) / self.massPendulum - cgPenalty
+        # Define relevant locations:
+        locationBallast     = self.lengthPendulum - self.ballast.thickness/2
+        locationBatteries   = locationBallast     - ((self.batteries.height) 
+                                                     if   self.radius > designThreshold 
+                                                     else (self.batteries.width/2))
+        locationSteerMotors = locationBatteries   - self.motors.radius
+        locationDriveMotors = self.radius/12/2 + self.motors.radius
+        locations = [self.pendulum.cg, locationBallast, locationBatteries, locationSteerMotors, locationDriveMotors]
+        masses    = [self.pendulum.mass, self.ballast.mass, self.batteries.mass, self.motors.mass, self.motors.mass]
+        numSum = 0
+        for location, mass in zip(locations, masses):
+            numSum += location*mass
+        return numSum/np.sum(np.array(masses))
+        # return (cgStructure + cgBatteries + cgActuators + cgBallast) / self.massPendulum - cgPenalty
 
     def mass_shell(self):
         massBedliner = 4.0/3.0*np.pi*(self.radius**3-(self.radius-self.thickness_shell())**3) * shellDensity # (8.75 * 0.133) #8.75 lb per gal, 0.133 ft3 per gal
@@ -98,7 +101,7 @@ class Ball:
         return self.hubRad**2 * np.pi * self.pendulum_length()
 
     def pendulum_mass(self):
-        return self.motors.mass + self.batteries.mass + self.pendulum.mass + self.ballast.mass 
+        return self.motors.mass*2 + self.batteries.mass + self.pendulum.mass + self.ballast.mass 
 
     def get_total_mass(self):
         return self.massShell+self.massPendulum
