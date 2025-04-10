@@ -15,6 +15,8 @@ class Ball:
         self.volumePendulum = self.pendulum_volume()
         self.lengthPendulum = self.pendulum_length()
 
+        self.ballastMass    = self.get_ballast_mass()
+
         self.massPendulum = self.pendulum_mass()
         self.massShell = self.mass_shell()
         
@@ -28,7 +30,10 @@ class Ball:
                        "Pendulum Mass": self.massPendulum,
                        "Shell": self.massShell, 
                        "Total Ball Mass": self.mass}
-        
+
+    def get_ballast_mass(self):
+        return self.ballast.density*(self.hub_rad**2*np.pi)*self.ballast.thickness
+
     def check_max_slope(self):
         return np.arcsin(self.r_max()/self.radius*np.sin(90*np.pi/180))*180/np.pi
 
@@ -52,7 +57,7 @@ class Ball:
 
     def radius_gravity(self):
         cgStructure =  self.volumePendulum*structureDensity * (self.lengthPendulum*0.5) #half way along pendulum length
-        cgBallast   =  self.ballast*self.lengthPendulum
+        cgBallast   =  self.ballastMass*self.lengthPendulum
         if self.radius > 1.5:
             cgBatteries = self.batteries.mass * (self.lengthPendulum - self.batteries.height) #midway between batteries
             cgActuators = self.motors.mass * (self.lengthPendulum - self.batteries.height*2 - self.motors.radius) #above batteries
@@ -82,13 +87,13 @@ class Ball:
     
     def pendulum_volume(self):
         if self.radius > 1.5:
-            hub_rad = 22*0.0833
+            self.hub_rad = 11*0.0833
         else: 
-            hub_rad = 19*0.0833
-        return hub_rad**2 * np.pi * self.pendulum_length()
+            self.hub_rad = 9.5*0.0833
+        return self.hub_rad**2 * np.pi * self.pendulum_length()
 
     def pendulum_mass(self):
-        return self.motors.mass + self.batteries.mass + self.volumePendulum*structureDensity + self.ballast 
+        return self.motors.mass + self.batteries.mass + self.volumePendulum*structureDensity + self.ballastMass 
 
     def get_total_mass(self):
         return self.massShell+self.massPendulum

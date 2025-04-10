@@ -1,4 +1,10 @@
 from params import *
+from materials import Material
+
+class Ballast:
+    def __init__(self, thickness, material: Material):
+        self.density = material.density
+        self.thickness = thickness
 
 class Batteries:
     def __init__(self, radius):

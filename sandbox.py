@@ -1,7 +1,10 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy import optimize as opt
+from materials import ballastMaterials
 from params import *
+from components import Ballast
+
 
 from ball import Ball
 
@@ -16,24 +19,35 @@ def main():
 
     R = np.linspace(1,3,101)
     # B = np.zeros_like(R)
-    B = np.linspace(0,55,len(R))
-    slope = np.zeros([len(R),len(R)])
-    i = 0
-    for radius in R:
-        j = 0
-        for ballast in B:
-            testBall = Ball(radius, ballast)
-            slope[j, i] = testBall.max_slope()
-            j+=1
-        i+=1
-    Rg, Bg = np.meshgrid(R, B)
-    # plt.figure()
-    ax = plt.axes(projection='3d')
-    ax.plot_surface(Rg, Bg, slope)
-    
-    ax.set_xlabel("Ball Radius")
-    ax.set_ylabel("Ballast Mass")
-    ax.set_zlabel("Slope Angle")
+    B = np.linspace(0,.5,len(R))
+    materials = ballastMaterials
+    # print(B)
+    k = 0
+    for material in materials:
+        slope = np.zeros([len(R),len(R)])
+        print(material.density)
+        i = 0
+        for radius in R:
+            j = 0
+            for ballastThickness in B:
+                iterationBallast = Ballast(ballastThickness, material)
+                testBall = Ball(radius, iterationBallast)
+                slope[j, i] = testBall.max_slope()
+                j+=1
+            i+=1
+        print(f"best slope angle for f{material.name} is f{np.max(slope)}")
+        Rg, Bg = np.meshgrid(R, B)
+        
+        plt.figure(f"material: {material.name}")
+        ax = plt.axes(projection='3d')
+        ax.plot_surface(Rg, Bg*12, slope)
+        
+        ax.set_xlabel("Ball Radius (ft)")
+        ax.set_ylabel("Ballast Thickness (in)")
+        ax.set_zlabel("Slope Angle (deg)")
+
+        k+=1
+
     try:
         plt.show()
     except KeyboardInterrupt:
