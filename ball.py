@@ -1,10 +1,10 @@
 from params import *
 import numpy as np
-from components import Batteries, Motors
+from components import Batteries, Motors, Ballast
 from components import neo2ft, gen1_6ft
 
 class Ball:
-    def __init__(self, radius, ballast):
+    def __init__(self, radius, ballast: Ballast):
         self.radius = radius
         self.ballast = ballast
 
@@ -13,7 +13,7 @@ class Ball:
         # self.motors    = Motors(self.batteries.number)
 
         self.volumePendulum = self.pendulum_volume()
-        self.lengthPendulum = self.pendulum_length()
+        # self.lengthPendulum = self.pendulum_length()
 
         self.ballastMass    = self.get_ballast_mass()
 
@@ -41,9 +41,10 @@ class Ball:
         return np.arcsin(self.motors.torque/(self.massPendulum*self.radiusGravity))*180/np.pi
 
     def select_motors(self):
-        if self.radius < 1.5:
+        if self.radius < designThreshold:
             return neo2ft
         else:
+            # TODO: gen2_6ft?
             return gen1_6ft
 
     def r_max(self):
@@ -57,14 +58,14 @@ class Ball:
 
     def radius_gravity(self):
         cgStructure =  self.volumePendulum*structureDensity * (self.lengthPendulum*0.5) #half way along pendulum length
-        cgBallast   =  self.ballastMass*self.lengthPendulum
-        if self.radius > 1.5:
-            cgBatteries = self.batteries.mass * (self.lengthPendulum - self.batteries.height) #midway between batteries
-            cgActuators = self.motors.mass * (self.lengthPendulum - self.batteries.height*2 - self.motors.radius) #above batteries
+        cgBallast   =  self.ballastMass*(self.lengthPendulum-self.ballast.thickness/2)
+        if self.radius > designThreshold:
+            cgBatteries = self.batteries.mass * (self.lengthPendulum - self.batteries.height - self.ballast.thickness) #midway between batteries
+            cgActuators = self.motors.mass * (self.lengthPendulum - self.batteries.height*2 - self.motors.radius - self.ballast.thickness) #above batteries
             cgPenalty = 0
         else:
-            cgBatteries = self.batteries.mass * (self.lengthPendulum - self.batteries.width/2) #midway between batteries
-            cgActuators = self.motors.mass * (self.lengthPendulum - self.batteries.width - self.motors.radius) #above batteries
+            cgBatteries = self.batteries.mass * (self.lengthPendulum - self.batteries.width/2 - self.ballast.thickness) #midway between batteries
+            cgActuators = self.motors.mass * (self.lengthPendulum - self.batteries.width - self.motors.radius - self.ballast.thickness) #above batteries
             cgPenalty = 0.266
         return (cgStructure + cgBatteries + cgActuators + cgBallast) / self.massPendulum - cgPenalty
 
@@ -77,16 +78,17 @@ class Ball:
         return massBedliner + massShaft + 20
 
     def thickness_shell(self):
-        if self.radius > 1.5:
+        if self.radius > designThreshold:
             return 1/(4.0*12)
         else:
             return 1/(8.0*12)
         
     def pendulum_length(self):
-        return 0.9*self.radius
+        self.lengthPendulum = pendulumRadiusAllowance*self.radius
+        return self.lengthPendulum
     
     def pendulum_volume(self):
-        if self.radius > 1.5:
+        if self.radius > designThreshold:
             self.hub_rad = 11*0.0833
         else: 
             self.hub_rad = 9.5*0.0833

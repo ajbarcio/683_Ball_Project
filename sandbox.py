@@ -25,7 +25,7 @@ def main():
     k = 0
     for material in materials:
         slope = np.zeros([len(R),len(R)])
-        print(material.density)
+        
         i = 0
         for radius in R:
             j = 0
@@ -35,7 +35,7 @@ def main():
                 slope[j, i] = testBall.max_slope()
                 j+=1
             i+=1
-        print(f"best slope angle for f{material.name} is f{np.max(slope)}")
+        print(f"best slope angle for {material.name} is {np.max(slope):.4f}")
         Rg, Bg = np.meshgrid(R, B)
         
         plt.figure(f"material: {material.name}")
