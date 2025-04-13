@@ -1,10 +1,14 @@
 from params import *
 from materials import Material
+import numpy as np
 
 class Ballast:
-    def __init__(self, thickness, material: Material):
+    def __init__(self, thickness, material: Material, radius):
+        self.material = material
         self.density = material.density
         self.thickness = thickness
+        self.volume = np.pi*radius**2*thickness
+        self.mass = self.volume*material.density
 
 class Batteries:
     def __init__(self, radius):

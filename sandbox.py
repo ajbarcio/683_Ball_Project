@@ -5,7 +5,6 @@ from materials import ballastMaterials
 from params import *
 from components import Ballast
 
-
 from ball import Ball
 
 # motorTypes = {'example type': []}
@@ -25,13 +24,11 @@ def main():
     k = 0
     for material in materials:
         slope = np.zeros([len(R),len(R)])
-        
         i = 0
         for radius in R:
             j = 0
             for ballastThickness in B:
-                iterationBallast = Ballast(ballastThickness, material)
-                testBall = Ball(radius, iterationBallast)
+                testBall = Ball(radius, ballastThickness, material)
                 slope[j, i] = testBall.max_slope()
                 j+=1
             i+=1
