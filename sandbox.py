@@ -5,6 +5,8 @@ from materials import ballastMaterials
 from params import *
 from components import Ballast
 
+from StatProfiler import SSProfile
+
 from ball import Ball
 
 # motorTypes = {'example type': []}
@@ -23,8 +25,10 @@ def main():
     i = 0
     for radius in R:
         # print(params.cgPenalty)
+        SSProfile("balleval").tic()
         testBall = Ball(radius, 0, ballastMaterials[0])
         slope[i] = testBall.max_slope()
+        SSProfile("balleval").toc()
         i+=1
     # print(f"best slope angle for {material.name} is {np.max(slope):.4f}")
     # Rg, Bg = np.meshgrid(R, B)
@@ -47,10 +51,12 @@ def main():
         for radius in R:
             j = 0
             for ballastThickness in B:
+                SSProfile("balleval").tic()
                 testBall = Ball(radius, ballastThickness, material)
                 slope[j, i] = testBall.max_slope()
                 cost[j, i] = testBall.cost_factor()
                 objective[j, i] = testBall.ball_objective()
+                SSProfile("balleval").toc()
                 j+=1
             i+=1
         print(f"best slope angle for {material.name} is {np.max(slope):.4f}")

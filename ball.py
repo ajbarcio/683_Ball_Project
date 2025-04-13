@@ -34,7 +34,7 @@ class Ball:
                        "Total Ball Mass": self.mass}
 
     def ball_objective(self):
-        weights = np.array([1,-0.51e-7])
+        weights = np.array([1,-1e-6])
         objective_vector = np.array([self.max_slope(), self.cost_factor()])
         return np.linalg.norm(objective_vector.dot(weights))
 
