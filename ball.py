@@ -2,6 +2,8 @@ from params import *
 import numpy as np
 from components import Batteries, Motors, Ballast
 from components import neo2ft, gen1_6ft
+from materials import osmium
+
 
 class Ball:
     def __init__(self, radius, ballastThickness, ballastMaterial, params=[shellDensity, structureDensity]):
@@ -34,9 +36,9 @@ class Ball:
                        "Total Ball Mass": self.mass}
 
     def ball_objective(self):
-        weights = np.array([1,-1e-6])
+        weights = np.array([1/30,-1])
         objective_vector = np.array([self.max_slope(), self.cost_factor()])
-        return np.linalg.norm(objective_vector.dot(weights))
+        return (objective_vector.dot(weights))
 
     def check_max_slope(self):
         return np.arcsin(self.r_max()/self.radius*np.sin(90*np.pi/180))*180/np.pi
@@ -59,8 +61,12 @@ class Ball:
     def max_slope(self):
         return np.arcsin(self.torqueApplicable()/(self.radius*self.mass))*180/np.pi
 
-    def cost_factor(self):
+    def cost(self):
         return self.ballast.mass*self.ballast.material.costperpound
+
+    def cost_factor(self):
+        factor = (np.pi*1*self.hub_rad**2)*osmium.density
+        return self.cost()/factor
 
     def torqueApplicable(self):
         return min(self.motors.torque, self.radiusGravity*self.massPendulum)
