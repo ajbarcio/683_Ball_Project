@@ -16,6 +16,24 @@ from ball import Ball
 
 def main():
 
+
+    R = np.linspace(1,3,101)
+    materials = ballastMaterials
+    # print(B)
+    slope = np.zeros_like(R)
+    i = 0
+    for radius in R:
+        # print(params.cgPenalty)
+        testBall = Ball(radius, 0, ballastMaterials[0])
+        slope[i] = testBall.max_slope()
+        i+=1
+    # print(f"best slope angle for {material.name} is {np.max(slope):.4f}")
+    # Rg, Bg = np.meshgrid(R, B)
+    print(slope)
+    plt.figure()
+    plt.plot(R, slope)
+
+
     R = np.linspace(1,3,101)
     # B = np.zeros_like(R)
     B = np.linspace(0,.5,len(R))
