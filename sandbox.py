@@ -16,7 +16,6 @@ from ball import Ball
 
 def main():
 
-
     R = np.linspace(1,3,101)
     materials = ballastMaterials
     # print(B)
@@ -29,7 +28,7 @@ def main():
         i+=1
     # print(f"best slope angle for {material.name} is {np.max(slope):.4f}")
     # Rg, Bg = np.meshgrid(R, B)
-    print(slope)
+    # print(slope)
     plt.figure()
     plt.plot(R, slope)
 
@@ -42,24 +41,47 @@ def main():
     k = 0
     for material in materials:
         slope = np.zeros([len(R),len(R)])
+        cost = np.zeros([len(R),len(R)])
+        objective = np.zeros([len(R),len(R)])
         i = 0
         for radius in R:
             j = 0
             for ballastThickness in B:
                 testBall = Ball(radius, ballastThickness, material)
                 slope[j, i] = testBall.max_slope()
+                cost[j, i] = testBall.cost_factor()
+                objective[j, i] = testBall.ball_objective()
                 j+=1
             i+=1
         print(f"best slope angle for {material.name} is {np.max(slope):.4f}")
+        # print(f"this occurs at {np.argmax(slope)}")
         Rg, Bg = np.meshgrid(R, B)
         
-        plt.figure(f"material: {material.name}")
+        plt.figure(f"slope, material: {material.name}")
         ax = plt.axes(projection='3d')
         ax.plot_surface(Rg, Bg*12, slope)
         
         ax.set_xlabel("Ball Radius (ft)")
         ax.set_ylabel("Ballast Thickness (in)")
         ax.set_zlabel("Slope Angle (deg)")
+
+        plt.figure(f"cost, material: {material.name}")
+        ax = plt.axes(projection='3d')
+        ax.plot_surface(Rg, Bg*12, cost)
+        
+        ax.set_xlabel("Ball Radius (ft)")
+        ax.set_ylabel("Ballast Thickness (in)")
+        ax.set_zlabel("Cost Factor ($)")
+
+        k+=1
+
+        plt.figure(f"objective, material: {material.name}")
+        ax = plt.axes(projection='3d')
+        ax.plot_surface(Rg, Bg*12, objective)
+        
+        ax.set_xlabel("Ball Radius (ft)")
+        ax.set_ylabel("Ballast Thickness (in)")
+        ax.set_zlabel("Objective (unitless)")
 
         k+=1
 

@@ -34,7 +34,9 @@ class Ball:
                        "Total Ball Mass": self.mass}
 
     def ball_objective(self):
-        return np.array([self.max_slope(), self.cost_factor()])
+        weights = np.array([1,-0.51e-7])
+        objective_vector = np.array([self.max_slope(), self.cost_factor()])
+        return np.linalg.norm(objective_vector.dot(weights))
 
     def check_max_slope(self):
         return np.arcsin(self.r_max()/self.radius*np.sin(90*np.pi/180))*180/np.pi
