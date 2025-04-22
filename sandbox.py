@@ -28,6 +28,10 @@ def main():
         SSProfile("balleval").tic()
         testBall = Ball(radius, 0, ballastMaterials[0])
         slope[i] = testBall.max_slope()
+
+        if testBall.infeasibleFlag:
+            slope[i] = 0
+
         SSProfile("balleval").toc()
         i+=1
     # print(f"best slope angle for {material.name} is {np.max(slope):.4f}")
@@ -56,6 +60,8 @@ def main():
                 slope[j, i] = testBall.max_slope()
                 cost[j, i] = testBall.cost_factor()
                 objective[j, i] = testBall.ball_objective()
+                if testBall.infeasibleFlag:
+                    slope[j, i] = 0
                 SSProfile("balleval").toc()
                 j+=1
             i+=1

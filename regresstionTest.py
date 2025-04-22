@@ -30,29 +30,29 @@ def main():
     # print(match(7.5, 1))
     # print(match(9, 3))
 
-    print(Ball(3, 0, ballastMaterials[0]).max_slope())
-    print(Ball(1, 14.5/(np.pi*9.5**2*copper.density), copper).max_slope())
+    print(Ball(3, 0, ballastMaterials[0]).max_slope()) # should match about 9.5
+    print(Ball(1, 14.5/(np.pi*9.5**2*copper.density), copper).max_slope()) # should match about 7.5
 
-    # R = np.linspace(1,3,101)
-    # materials = ballastMaterials
-    # # print(B)
-    # slope = np.zeros_like(R)
-    # i = 0
-    # for radius in R:
-    #     # print(params.cgPenalty)
-    #     testBall = Ball(radius, 0, ballastMaterials[0])
-    #     slope[i] = testBall.max_slope()
-    #     i+=1
+    R = np.linspace(1,3,101)
+    materials = ballastMaterials
+    # print(B)
+    slope = np.zeros_like(R)
+    i = 0
+    for radius in R:
+        # print(params.cgPenalty)
+        testBall = Ball(radius, 0, ballastMaterials[0])
+        slope[i] = testBall.max_slope()
+        i+=1
     # # print(f"best slope angle for {material.name} is {np.max(slope):.4f}")
     # # Rg, Bg = np.meshgrid(R, B)
     
-    # plt.figure()
-    # plt.plot(R, slope)
+    plt.figure()
+    plt.plot(R, slope)
 
-    # try:
-    #     plt.show()
-    # except KeyboardInterrupt:
-    #     return 0
+    try:
+        plt.show()
+    except KeyboardInterrupt:
+        return 0
 
 
 

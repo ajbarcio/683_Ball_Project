@@ -68,8 +68,9 @@ if __name__ == '__main__':
     resultVector = result.x
     resultVector[-1] = (np.round(resultVector[-1], 0))
     material = ballastMaterials[int(resultVector[-1])]
+    resultBall = Ball(resultVector[0], resultVector[1], material)
     print(f"design a {resultVector[0]*2} ft ball, with {resultVector[1]*12} inches of {material} ballast")
-    
+    print(f"This ball uses {resultBall.motors} motors")
     resultBall = Ball(resultVector[0], resultVector[1], material)
     print(resultBall.max_slope())
     print(resultBall.cost())

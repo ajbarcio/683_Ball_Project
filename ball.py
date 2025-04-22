@@ -6,15 +6,18 @@ from materials import osmium
 
 
 class Ball:
-    def __init__(self, radius, ballastThickness, ballastMaterial, params=[shellDensity, structureDensity]):
+    def __init__(self, radius, ballastThickness, ballastMaterial, params=[shellDensity, structureDensities]):
+        self.infeasibleFlag = 0
+        
         self.radius = radius
         self.ballastThickness = ballastThickness
         self.shellDensity = params[0]
-        self.structureDensity = params[1]
+        # self.structureDensity = params[1]
+        self.structureDensities = params[1]
         # print(self.shellDensity, self.structureDensity)
 
-        self.batteries = Batteries(self.radius)
         self.motors = self.select_motors()
+        self.batteries = Batteries(self.motors)
         # self.motors    = Motors(self.batteries.number)
 
         self.volumePendulum = self.pendulum_volume()
@@ -54,8 +57,9 @@ class Ball:
         if pendulumLength - stackupHeight > gen1_6ft.radius*2:
             return gen1_6ft
         else:
+            self.infeasibleFlag = 1
             # TODO: gen2_6ft?
-            return neo2ft
+            return gen1_6ft
 
     def r_max(self):
         return (self.radiusGravity*self.massPendulum)/self.mass
@@ -125,6 +129,10 @@ class Ball:
         return self.hubRad**2 * np.pi * self.pendulum_length()
 
     def pendulum_mass(self):
+        if self.motors == gen1_6ft:
+            self.structureDensity = self.structureDensities[1]
+        else:
+            self.structureDensity = self.structureDensities[0]
         return self.motors.mass + self.batteries.mass + self.volumePendulum*self.structureDensity + self.ballast.mass 
 
     def get_total_mass(self):
