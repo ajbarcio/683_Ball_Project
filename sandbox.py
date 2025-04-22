@@ -56,6 +56,11 @@ def main():
                 slope[j, i] = testBall.max_slope()
                 cost[j, i] = testBall.cost_factor()
                 objective[j, i] = testBall.ball_objective()
+                # check for feasibility
+                if np.linalg.norm([testBall.hubRad,testBall.lengthPendulum]) > radius:
+                    slope[j, i] = np.nan
+                    cost[j, i] = np.nan
+                    objective[j, i] = np.nan
                 SSProfile("balleval").toc()
                 j+=1
             i+=1
@@ -71,30 +76,28 @@ def main():
         ax.set_ylabel("Ballast Thickness (in)")
         ax.set_zlabel("Slope Angle (deg)")
 
-        plt.figure(f"cost, material: {material.name}")
-        ax = plt.axes(projection='3d')
-        ax.plot_surface(Rg, Bg*12, cost)
+        # plt.figure(f"cost, material: {material.name}")
+        # ax = plt.axes(projection='3d')
+        # ax.plot_surface(Rg, Bg*12, cost)
         
-        ax.set_xlabel("Ball Radius (ft)")
-        ax.set_ylabel("Ballast Thickness (in)")
-        ax.set_zlabel("Cost Factor ($)")
+        # ax.set_xlabel("Ball Radius (ft)")
+        # ax.set_ylabel("Ballast Thickness (in)")
+        # ax.set_zlabel("Cost Factor ($)")
 
-        k+=1
-
-        plt.figure(f"objective, material: {material.name}")
-        ax = plt.axes(projection='3d')
-        ax.plot_surface(Rg, Bg*12, objective)
+        # plt.figure(f"objective, material: {material.name}")
+        # ax = plt.axes(projection='3d')
+        # ax.plot_surface(Rg, Bg*12, objective)
         
-        ax.set_xlabel("Ball Radius (ft)")
-        ax.set_ylabel("Ballast Thickness (in)")
-        ax.set_zlabel("Objective (unitless)")
+        # ax.set_xlabel("Ball Radius (ft)")
+        # ax.set_ylabel("Ballast Thickness (in)")
+        # ax.set_zlabel("Objective (unitless)")
 
         k+=1
 
     try:
         plt.show()
     except KeyboardInterrupt:
-        return 0
+        pass
 
 if __name__ == "__main__":
     main()

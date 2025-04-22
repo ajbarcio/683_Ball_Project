@@ -19,7 +19,7 @@ class Ball:
 
         self.volumePendulum = self.pendulum_volume()
         # self.lengthPendulum = self.pendulum_length()
-        self.ballast = Ballast(ballastThickness, ballastMaterial, self.hub_rad)
+        self.ballast = Ballast(ballastThickness, ballastMaterial, self.hubRad)
 
         self.massPendulum = self.pendulum_mass()
         self.massShell = self.mass_shell()
@@ -47,7 +47,9 @@ class Ball:
         return np.arcsin(self.motors.torque/(self.massPendulum*self.radiusGravity))*180/np.pi
 
     def select_motors(self):
+        # start by assuming 6ft ball architecture
         stackupHeight = self.ballastThickness+self.batteries.height+gen1_6ft.radius*2
+        self.hubRad = 11*0.0833
         pendulumLength = self.pendulum_length()
         if pendulumLength - stackupHeight > gen1_6ft.radius*2:
             return gen1_6ft
@@ -65,7 +67,10 @@ class Ball:
         return self.ballast.mass*self.ballast.material.costperpound
 
     def cost_factor(self):
-        factor = (np.pi*1*self.hub_rad**2)*osmium.density
+        if self.motors == gen1_6ft:
+            factor = 40000
+        else:
+            factor = 30000
         return self.cost()/factor
 
     def torqueApplicable(self):
@@ -107,15 +112,17 @@ class Ball:
         return m*self.mass + b
         
     def pendulum_length(self):
-        self.lengthPendulum = pendulumRadiusAllowance*self.radius
+        pendNorm = pendulumRadiusAllowance*self.radius
+        # length**2 + hubRad**2 = pendNorm**2
+        self.lengthPendulum = np.sqrt(pendNorm**2 - self.hubRad**2) # pendulumRadiusAllowance*self.radius
         return self.lengthPendulum
     
     def pendulum_volume(self):
         if self.motors == gen1_6ft:
-            self.hub_rad = 11*0.0833
+            self.hubRad = 11*0.0833
         else: 
-            self.hub_rad = 9.5*0.0833
-        return self.hub_rad**2 * np.pi * self.pendulum_length()
+            self.hubRad = 9.5*0.0833
+        return self.hubRad**2 * np.pi * self.pendulum_length()
 
     def pendulum_mass(self):
         return self.motors.mass + self.batteries.mass + self.volumePendulum*self.structureDensity + self.ballast.mass 
