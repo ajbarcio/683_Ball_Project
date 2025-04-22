@@ -56,11 +56,6 @@ def main():
                 slope[j, i] = testBall.max_slope()
                 cost[j, i] = testBall.cost_factor()
                 objective[j, i] = testBall.ball_objective()
-                # check for feasibility
-                if np.linalg.norm([testBall.hubRad,testBall.lengthPendulum]) > radius:
-                    slope[j, i] = np.nan
-                    cost[j, i] = np.nan
-                    objective[j, i] = np.nan
                 SSProfile("balleval").toc()
                 j+=1
             i+=1

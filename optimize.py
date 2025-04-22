@@ -35,15 +35,6 @@ def optimize_ball_design():
         (0, len(ballastMaterials)-1)      # material, idk how to discretize
     ]
 
-    def volume_exceedance(designVector):
-        radius, thickness, material_index = designVector
-        i = int(np.round(material_index, 0))
-        testBall = Ball(radius, thickness, ballastMaterials[i])
-        if np.linalg.norm([testBall.hubRad,testBall.lengthPendulum]) > radius:
-            return 1
-        else:
-            return 0
-
     def cost_factor(designVector):
         radius, thickness, material_index = designVector
         i = int(np.round(material_index, 0))
@@ -57,7 +48,6 @@ def optimize_ball_design():
         return -testBall.ball_objective()
 
     costConstraint = NonlinearConstraint(cost_factor, 0, 1)
-    volumeConstraint = NonlinearConstraint(volume_exceedance, -0.5,0.5)
 
     result = differential_evolution(
         ball_objective,
@@ -66,7 +56,7 @@ def optimize_ball_design():
         maxiter=1000,
         popsize=85,
         tol=1e-6,
-        constraints=[costConstraint, volumeConstraint],
+        constraints=costConstraint,
         polish=False
     )
 

@@ -8,4 +8,4 @@ shellDensity     = 2 # lb/ft^3 ??
 cgPenalty = 0.33
 
 designThreshold = 1.5
-pendulumRadiusAllowance = 0.92
+pendulumRadiusAllowance = 0.95
