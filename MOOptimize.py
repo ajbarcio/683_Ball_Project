@@ -12,7 +12,7 @@ from materials import ballastMaterials
 class MultiObjectiveMixedVariableProblem(ElementwiseProblem):
     def __init__(self, **kwargs):
         vars = {
-            "radius": Real(bounds=(1.5, 3)),
+            "radius": Real(bounds=(1, 3)),
             "ballastThickness": Real(bounds=(0,1)),
             "ballastMaterial": Choice(options=ballastMaterials)
         }
