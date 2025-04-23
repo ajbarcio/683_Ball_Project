@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.optimize import differential_evolution, NonlinearConstraint
+from scipy.optimize import differential_evolution, NonlinearConstraint, OptimizeResult
 from ball import Ball 
 from materials import ballastMaterials
 
@@ -41,6 +41,12 @@ def optimize_ball_design():
         testBall = Ball(radius, thickness, ballastMaterials[i])
         return testBall.cost()
 
+    # def ball_objective(designVector):
+    #     radius, thickness, material_index = designVector
+    #     i = int(np.round(material_index, 0))
+    #     testBall = Ball(radius, thickness, ballastMaterials[i])
+    #     return -testBall.ball_objective()
+
     def ball_objective(designVector):
         radius, thickness, material_index = designVector
         i = int(np.round(material_index, 0))
@@ -48,6 +54,16 @@ def optimize_ball_design():
         return -testBall.ball_objective()
 
     costConstraint = NonlinearConstraint(cost, 0, 2000)
+
+    def ball_callback(result: OptimizeResult):
+        objectiveVectors = []
+        for designVector in result.population:
+            radius, thickness, material_index = designVector
+            i = int(np.round(material_index, 0))
+            callbackBall = Ball(radius, thickness, ballastMaterials[i])
+            objectiveVector = [callbackBall.slope_factor(), callbackBall.cost_factor()]
+            objectiveVectors.append(objectiveVector)
+        return objectiveVectors
 
     result = differential_evolution(
         ball_objective,
@@ -73,3 +89,6 @@ if __name__ == '__main__':
     resultBall = Ball(resultVector[0], resultVector[1], material)
     print(resultBall.max_slope())
     print(resultBall.cost())
+    print()
+    print(np.linalg.norm([resultBall.lengthPendulum,resultBall.hubRad]))
+    print(resultVector[0])

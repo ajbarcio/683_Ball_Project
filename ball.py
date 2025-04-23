@@ -19,7 +19,7 @@ class Ball:
 
         self.volumePendulum = self.pendulum_volume()
         # self.lengthPendulum = self.pendulum_length()
-        self.ballast = Ballast(ballastThickness, ballastMaterial, self.hub_rad)
+        self.ballast = Ballast(ballastThickness, ballastMaterial, self.hubRad)
 
         self.massPendulum = self.pendulum_mass()
         self.massShell = self.mass_shell()
@@ -36,12 +36,12 @@ class Ball:
                        "Total Ball Mass": self.mass}
 
     def ball_objective(self):
-        weights = np.array([1/30,-1])
-        objective_vector = np.array([self.max_slope(), self.cost_factor()])
-        return (objective_vector.dot(weights))
+        weights = np.array([1,-1])
+        objectiveVector = self.ball_objective_vector()
+        return (objectiveVector.dot(weights))
 
-    def check_max_slope(self):
-        return np.arcsin(self.r_max()/self.radius*np.sin(90*np.pi/180))*180/np.pi
+    def ball_objective_vector(self):
+        return np.array([self.slope_factor(), self.cost_factor()])
 
     def gamma_possible(self):
         return np.arcsin(self.motors.torque/(self.massPendulum*self.radiusGravity))*180/np.pi
@@ -52,7 +52,6 @@ class Ball:
         if pendulumLength - stackupHeight > gen1_6ft.radius*2:
             return gen1_6ft
         else:
-            # TODO: gen2_6ft?
             return neo2ft
 
     def r_max(self):
@@ -61,11 +60,15 @@ class Ball:
     def max_slope(self):
         return np.arcsin(self.torqueApplicable()/(self.radius*self.mass))*180/np.pi
 
+    def slope_factor(self):
+        return self.max_slope()/30
+
     def cost(self):
         return self.ballast.mass*self.ballast.material.costperpound
 
     def cost_factor(self):
-        factor = (np.pi*1*self.hub_rad**2)*osmium.density
+        # factor = (np.pi*1*self.hubRad**2)*osmium.density
+        factor = 30000
         return self.cost()/factor
 
     def torqueApplicable(self):
@@ -112,10 +115,10 @@ class Ball:
     
     def pendulum_volume(self):
         if self.motors == gen1_6ft:
-            self.hub_rad = 11*0.0833
+            self.hubRad = 11*0.0833 # Could minimize this?
         else: 
-            self.hub_rad = 9.5*0.0833
-        return self.hub_rad**2 * np.pi * self.pendulum_length()
+            self.hubRad = 9.5*0.0833
+        return self.hubRad**2 * np.pi * self.pendulum_length()
 
     def pendulum_mass(self):
         return self.motors.mass + self.batteries.mass + self.volumePendulum*self.structureDensity + self.ballast.mass 
