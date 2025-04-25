@@ -24,7 +24,7 @@ class MultiObjectiveMixedVariableProblem(ElementwiseProblem):
         evaluationBall = Ball(radius, ballastThickness, ballastMaterial)
         # out["maxAngleFactor"] = evaluationBall.slope_factor()
         # out["costFactor"]     = evaluationBall.cost_factor()
-        out["F"] = [evaluationBall.max_slope(), evaluationBall.cost()]
+        out["F"] = [-evaluationBall.max_slope(), evaluationBall.cost()]
 
 problem   = MultiObjectiveMixedVariableProblem()
 algorithm = MixedVariableGA(pop_size=100, survival=RankAndCrowdingSurvival())
@@ -32,8 +32,9 @@ algorithm = MixedVariableGA(pop_size=100, survival=RankAndCrowdingSurvival())
 res = minimize(problem, algorithm, termination=('n_evals', 1000),
                seed = 1, verbose=False)
 
-plot = Scatter()
+plot = Scatter(labels = ["Slope","Cost"], title = "RoboBall Optimizer Pareto Front")
 plot.add(problem.pareto_front(), plot_type="line", color="black", alpha=0.7)
 plot.add(res.F, facecolor="none", edgecolor="red")
 plot.show()
+
 # print(f"Best Solution Found: {res.X} gives {res.F}")
