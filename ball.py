@@ -61,15 +61,14 @@ class Ball:
         return np.arcsin(self.torqueApplicable()/(self.radius*self.mass))*180/np.pi
 
     def slope_factor(self):
-        return self.max_slope()/30
+        return self.max_slope()*slope_factor
 
     def cost(self):
         return self.ballast.mass*self.ballast.material.costperpound
 
     def cost_factor(self):
         # factor = (np.pi*1*self.hubRad**2)*osmium.density
-        factor = 30000
-        return self.cost()/factor
+        return self.cost()*cost_factor
 
     def torqueApplicable(self):
         return min(self.motors.torque, self.radiusGravity*self.massPendulum)

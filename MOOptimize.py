@@ -38,6 +38,7 @@ algorithm = MixedVariableGA(pop_size=100, survival=RankAndCrowdingSurvival())
 res = minimize(problem, algorithm, termination=('n_gen', 500),
                seed = 1, verbose=False)
 
+<<<<<<< HEAD
 # plot = Scatter()
 # plot.add(problem.pareto_front(), plot_type="line", color="black", alpha=0.7)
 # # print(res.n_gen)
@@ -83,3 +84,11 @@ for materialExcludes in allMaterialExcludes:
     ax.set_ylabel("Objective 2: Cost ($)")
     ax.set_title("Non-Dominated Set of Objectives")
 plt.show()
+=======
+plot = Scatter(labels = ["Slope","Cost"], title = "RoboBall Optimizer Pareto Front")
+plot.add(problem.pareto_front(), plot_type="line", color="black", alpha=0.7)
+plot.add(res.F, facecolor="none", edgecolor="red")
+plot.show()
+
+# print(f"Best Solution Found: {res.X} gives {res.F}")
+>>>>>>> a27cea8e8af5f2b162e572ed501240ea0192b5e2

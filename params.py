@@ -9,3 +9,7 @@ cgPenalty = 0.33
 
 designThreshold = 1.5
 pendulumRadiusAllowance = 0.92
+
+slope_factor = 1/30.0
+cost_factor = 1/30000.0
+cost_limit = 2000.0
