@@ -55,15 +55,15 @@ def optimize_ball_design():
 
     costConstraint = NonlinearConstraint(cost, 0, 2000)
 
-    def ball_callback(result: OptimizeResult):
-        objectiveVectors = []
-        for designVector in result.population:
-            radius, thickness, material_index = designVector
-            i = int(np.round(material_index, 0))
-            callbackBall = Ball(radius, thickness, ballastMaterials[i])
-            objectiveVector = [callbackBall.slope_factor(), callbackBall.cost_factor()]
-            objectiveVectors.append(objectiveVector)
-        return objectiveVectors
+    # def ball_callback(intermediate_result: OptimizeResult):
+    #     objectiveVectors = []
+    #     for designVector in intermediate_result.population:
+    #         radius, thickness, material_index = designVector
+    #         i = int(np.round(material_index, 0))
+    #         callbackBall = Ball(radius, thickness, ballastMaterials[i])
+    #         objectiveVector = [callbackBall.slope_factor(), callbackBall.cost_factor()]
+    #         objectiveVectors.append(objectiveVector)
+    #     return objectiveVectors
 
     result = differential_evolution(
         ball_objective,
